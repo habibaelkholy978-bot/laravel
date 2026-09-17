@@ -1,51 +1,47 @@
 <?php
 
-namespace App\Http/Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Category;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
+use App\Models\Category;
 
 class CategoryController extends Controller
 {
     public function index()
     {
         $categories = Category::all();
-        return view('categories.index', compact('categories'));
-    }
 
-    public function create()
-    {
-        return view('categories.create');
-    }
-
-    public function store(CategoryRequest $request)
-    {
-        Category::create($request->validated());
-        return redirect()->route('categories.index');
+        return response()->json($categories);
     }
 
     public function show($id)
     {
-    
-        $category = Category::with(['products', 'products.orderItems.order.user'])->findOrFail($id);
-        return view('categories.show', compact('category'));
+        $category = Category::findOrFail($id);
+
+        return response()->json($category);
     }
 
-    public function edit($id)
+    public function store(CategoryRequest $request)
     {
-        $category = Category::findOrFail($id);
-        return view('categories.edit', compact('category'));
+        $category = Category::create($request->validated());
+
+        return response()->json($category, 201);
     }
 
     public function update(CategoryRequest $request, $id)
     {
-        Category::findOrFail($id)->update($request->validated());
-        return redirect()->route('categories.index');
+        $category = Category::findOrFail($id);
+        $category->update($request->validated());
+
+        return response()->json($category);
     }
 
     public function destroy($id)
     {
-        Category::findOrFail($id)->delete();
-        return redirect()->route('categories.index');
+        $category = Category::findOrFail($id);
+        $category->delete();
+
+        return response()->json(['message' => 'Deleted successfully']);
     }
 }

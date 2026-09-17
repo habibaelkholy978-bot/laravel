@@ -1,53 +1,47 @@
 <?php
 
-namespace App\Http/Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Product;
-use App\Models\Category;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('category')->get();
-        return view('products.index', compact('products'));
-    }
+        $products = Product::all();
 
-    public function create()
-    {
-        $categories = Category::all();
-        return view('products.create', compact('categories'));
-    }
-
-    public function store(ProductRequest $request)
-    {
-        Product::create($request->validated());
-        return redirect()->route('products.index');
+        return response()->json($products);
     }
 
     public function show($id)
     {
-        $product = Product::with(['category', 'orderItems.order.user'])->findOrFail($id);
-        return view('products.show', compact('product'));
+        $product = Product::findOrFail($id);
+
+        return response()->json($product);
     }
 
-    public function edit($id)
+    public function store(ProductRequest $request)
     {
-        $product = Product::findOrFail($id);
-        $categories = Category::all();
-        return view('products.edit', compact('product', 'categories'));
+        $product = Product::create($request->validated());
+
+        return response()->json($product, 201);
     }
 
     public function update(ProductRequest $request, $id)
     {
-        Product::findOrFail($id)->update($request->validated());
-        return redirect()->route('products.index');
+        $product = Product::findOrFail($id);
+        $product->update($request->validated());
+
+        return response()->json($product);
     }
 
     public function destroy($id)
     {
-        Product::findOrFail($id)->delete();
-        return redirect()->route('products.index');
+        $product = Product::findOrFail($id);
+        $product->delete();
+
+        return response()->json(['message' => 'Deleted successfully']);
     }
 }
